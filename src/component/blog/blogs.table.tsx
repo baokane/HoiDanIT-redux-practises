@@ -1,36 +1,76 @@
 import Table from 'react-bootstrap/Table';
+import { useAppDispatch, useAppSelector } from '../../redux/hook';
+import { useEffect, useState } from 'react';
+import { fetchBlog } from '../../redux/blog/blog.slide';
+import BlogCreateModal from './blog.create';
+import BlogUpdateModal from './blog.update';
+import BlogDeleteModal from './blog.delete';
 
 function BlogTable() {
-    return (
+
+    const [showBlogCreateModal, setShowBlogCreateModal] = useState(false)
+    const [showBlogUpdateModal, setShowBlogUpdateModal] = useState(false)
+    const [showBlogDeleteModal, setShowBlogDeleteModal] = useState(false)
+    const [dataBlogUpdate, setDataBlogUpdate] = useState({})
+    const [dataBlogDelete, setDataBlogDelete] = useState({})
+
+    const dispatch = useAppDispatch()
+
+    const dataBlog = useAppSelector(state => state.blog.listBlog)
+
+    useEffect(() => {
+        dispatch(fetchBlog())
+    }, [])
+
+    const handleBlogUpdate = (dataUpdate: any) => {
+        setDataBlogUpdate(dataUpdate)
+        setShowBlogUpdateModal(true)
+    }
+
+    const handleBlogDelete = (dataDelete: any) => {
+        setShowBlogDeleteModal(true)
+        setDataBlogDelete(dataDelete)
+    }
+
+    return (<>
+
+        <div style={{ display: "flex", justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h4>Table Blog</h4>
+            <button className='btn btn-primary' onClick={() => setShowBlogCreateModal(true)}>Add New Blog</button>
+        </div>
         <Table striped bordered hover>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Content</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td colSpan={2}>Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
+                {dataBlog && dataBlog.length > 0 && dataBlog.map((item, index) => {
+                    return (
+                        <tr key={item.id}>
+                            <td>{item.id}</td>
+                            <td>{item.title}</td>
+                            <td>{item.author}</td>
+                            <td>{item.content}</td>
+                            <td>
+                                <span>
+                                    <button className='btn btn-success' onClick={() => handleBlogUpdate(item)}>UPDATE</button>
+                                    <button className='btn btn-warning' onClick={() => handleBlogDelete(item)}>DELETE</button>
+                                </span>
+                            </td>
+                        </tr>
+                    )
+                })}
             </tbody>
         </Table>
+        <BlogCreateModal show={showBlogCreateModal} setShow={setShowBlogCreateModal} />
+        <BlogUpdateModal show={showBlogUpdateModal} setShow={setShowBlogUpdateModal} dataBlogUpdate={dataBlogUpdate} />
+        <BlogDeleteModal show={showBlogDeleteModal} setShow={setShowBlogDeleteModal} dataBlogDelete={dataBlogDelete} />
+    </>
     );
 }
 
